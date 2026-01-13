@@ -14,6 +14,8 @@ import DashboardDocument from "./pages/DashboardDocument";
 import DashboardUpload from "./pages/DashboardUpload";
 import DashboardBilling from "./pages/DashboardBilling";
 import DashboardSettings from "./pages/DashboardSettings";
+import DashboardDocumentFlow from "./pages/DashboardDocumentFlow";
+import DashboardCompany from "./pages/DashboardCompany";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
           <Route path="/dashboard/upload" element={<DashboardUpload />} />
           <Route path="/dashboard/billing" element={<DashboardBilling />} />
           <Route path="/dashboard/settings" element={<DashboardSettings />} />
+          <Route path="/dashboard/document-flow" element={<DashboardDocumentFlow />} />
+          <Route path="/dashboard/company" element={<DashboardCompany />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

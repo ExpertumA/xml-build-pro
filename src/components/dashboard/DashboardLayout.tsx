@@ -7,7 +7,9 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Receipt,
+  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -19,7 +21,9 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "Документы", href: "/dashboard/documents", icon: FileText },
+  { name: "Документооборот", href: "/dashboard/document-flow", icon: Receipt },
   { name: "Подписка", href: "/dashboard/billing", icon: CreditCard },
+  { name: "Компания", href: "/dashboard/company", icon: Building2 },
   { name: "Настройки", href: "/dashboard/settings", icon: Settings },
 ];
 

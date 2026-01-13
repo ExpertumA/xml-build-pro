@@ -2,6 +2,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/home/HeroSection";
 import ScrollSection from "@/components/home/ScrollSection";
+import SupportedDocumentsSection from "@/components/home/SupportedDocumentsSection";
+import PricingSection from "@/components/home/PricingSection";
 import CTASection from "@/components/home/CTASection";
 
 const Index = () => {
@@ -11,6 +13,8 @@ const Index = () => {
       <main className="flex-1">
         <HeroSection />
         <ScrollSection />
+        <SupportedDocumentsSection />
+        <PricingSection />
         <CTASection />
       </main>
       <Footer />
