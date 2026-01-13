@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Upload, FileSearch, CheckCircle, Download } from "lucide-react";
+import { Upload, FileSearch, CheckCircle, XCircle, Download, FileText, AlertTriangle } from "lucide-react";
 
 const steps = [
   {
@@ -28,6 +28,171 @@ const steps = [
   },
 ];
 
+// Step 1: Upload Interface
+const UploadInterface = () => (
+  <div className="animate-fade-in space-y-4">
+    <div className="border-2 border-dashed border-primary/40 rounded-xl p-8 text-center bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
+      <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-2xl bg-primary/10 mb-4">
+        <Upload className="h-7 w-7 text-primary" />
+      </div>
+      <p className="font-medium text-foreground mb-1">Перетащите файлы сюда</p>
+      <p className="text-sm text-muted-foreground">или нажмите для выбора</p>
+      <p className="text-xs text-muted-foreground mt-2">PDF, DOCX, XLSX до 50 МБ</p>
+    </div>
+    
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 p-3 bg-success/10 border border-success/20 rounded-lg">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/20">
+          <FileText className="h-4 w-4 text-success" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">ПЗ_Раздел1_v2.pdf</p>
+          <p className="text-xs text-muted-foreground">2.4 МБ</p>
+        </div>
+        <span className="text-xs font-medium text-success bg-success/10 px-2 py-1 rounded">Загружено</span>
+      </div>
+      <div className="flex items-center gap-3 p-3 bg-success/10 border border-success/20 rounded-lg">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success/20">
+          <FileText className="h-4 w-4 text-success" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">Конъюнктурный_анализ.xlsx</p>
+          <p className="text-xs text-muted-foreground">890 КБ</p>
+        </div>
+        <span className="text-xs font-medium text-success bg-success/10 px-2 py-1 rounded">Загружено</span>
+      </div>
+    </div>
+  </div>
+);
+
+// Step 2: Document Type Detection
+const DetectionInterface = () => (
+  <div className="animate-fade-in space-y-4">
+    <div className="p-4 bg-secondary/50 rounded-xl border border-border">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <FileSearch className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <p className="font-medium">ПЗ_Раздел1_v2.pdf</p>
+          <p className="text-sm text-muted-foreground">Анализ документа</p>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Тип документа:</span>
+          <span className="font-medium text-foreground">Пояснительная записка</span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">XML-схема:</span>
+          <span className="font-mono text-xs bg-secondary px-2 py-1 rounded">ExplanatoryNote_v3.2.xsd</span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Версия схемы:</span>
+          <span className="font-medium">3.2 (актуальная)</span>
+        </div>
+      </div>
+    </div>
+    
+    <div className="flex items-center gap-3 p-4 bg-success/10 border border-success/20 rounded-xl">
+      <CheckCircle className="h-5 w-5 text-success" />
+      <div>
+        <p className="font-medium text-success">Схема определена</p>
+        <p className="text-sm text-muted-foreground">Документ готов к валидации</p>
+      </div>
+    </div>
+  </div>
+);
+
+// Step 3: Validation Interface
+const ValidationInterface = () => (
+  <div className="animate-fade-in space-y-4">
+    <div className="bg-secondary/30 rounded-xl border border-border overflow-hidden">
+      <div className="flex items-center justify-between p-3 border-b border-border bg-secondary/50">
+        <span className="text-sm font-medium">result.xml</span>
+        <span className="text-xs text-muted-foreground">Проверка XSD</span>
+      </div>
+      <div className="p-3 font-mono text-xs space-y-1 max-h-36 overflow-hidden">
+        <div className="text-muted-foreground">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</div>
+        <div className="text-muted-foreground">&lt;ExplanatoryNote xmlns="..."&gt;</div>
+        <div className="pl-4 text-muted-foreground">&lt;ProjectInfo&gt;</div>
+        <div className="pl-8 text-destructive bg-destructive/10 -mx-3 px-3 py-0.5 border-l-2 border-destructive">
+          &lt;Name&gt;&lt;/Name&gt; <span className="text-destructive/70">← пустое поле</span>
+        </div>
+        <div className="pl-8 text-muted-foreground">&lt;Address&gt;г. Москва...&lt;/Address&gt;</div>
+        <div className="pl-4 text-muted-foreground">&lt;/ProjectInfo&gt;</div>
+      </div>
+    </div>
+    
+    <div className="space-y-2">
+      <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+        <div className="text-sm">
+          <p className="font-medium text-destructive">Ошибка: строка 4</p>
+          <p className="text-muted-foreground">Обязательное поле «Name» не заполнено</p>
+        </div>
+      </div>
+      <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+        <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+        <div className="text-sm">
+          <p className="font-medium text-warning">Предупреждение: строка 12</p>
+          <p className="text-muted-foreground">Рекомендуется указать ИНН организации</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg">
+        <CheckCircle className="h-4 w-4 text-success shrink-0" />
+        <span className="text-sm text-success font-medium">Пройдено проверок: 47/48</span>
+      </div>
+    </div>
+  </div>
+);
+
+// Step 4: Result Interface
+const ResultInterface = () => (
+  <div className="animate-fade-in space-y-4">
+    <div className="p-5 bg-card rounded-xl border border-border shadow-sm">
+      <div className="flex items-start gap-4 mb-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10">
+          <FileText className="h-6 w-6 text-success" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-lg">ПЗ_Раздел1_v2.xml</p>
+          <p className="text-sm text-muted-foreground">Пояснительная записка</p>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 mb-5">
+        <div className="p-3 bg-secondary/50 rounded-lg">
+          <p className="text-xs text-muted-foreground mb-1">Размер</p>
+          <p className="font-medium">156 КБ</p>
+        </div>
+        <div className="p-3 bg-secondary/50 rounded-lg">
+          <p className="text-xs text-muted-foreground mb-1">Версия XSD</p>
+          <p className="font-medium">3.2</p>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-lg mb-4">
+        <CheckCircle className="h-5 w-5 text-success" />
+        <div>
+          <p className="font-medium text-success">Валидация пройдена</p>
+          <p className="text-xs text-muted-foreground">Все проверки XSD успешны</p>
+        </div>
+      </div>
+      
+      <button className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex items-center justify-center gap-2 font-medium transition-colors">
+        <Download className="h-5 w-5" />
+        Скачать XML
+      </button>
+    </div>
+    
+    <p className="text-center text-sm text-muted-foreground">
+      Готово к отправке в экспертизу
+    </p>
+  </div>
+);
+
 const ScrollSection = () => {
   const [activeStep, setActiveStep] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -55,6 +220,21 @@ const ScrollSection = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const renderInterface = () => {
+    switch (activeStep) {
+      case 0:
+        return <UploadInterface />;
+      case 1:
+        return <DetectionInterface />;
+      case 2:
+        return <ValidationInterface />;
+      case 3:
+        return <ResultInterface />;
+      default:
+        return <UploadInterface />;
+    }
+  };
 
   return (
     <section ref={sectionRef} className="py-24 lg:py-32">
@@ -99,88 +279,23 @@ const ScrollSection = () => {
             ))}
           </div>
 
-          {/* Sticky illustration */}
+          {/* Sticky interface mockup */}
           <div className="hidden lg:block">
             <div className="sticky top-32">
-              <div className="relative aspect-square rounded-2xl bg-secondary/50 border border-border overflow-hidden shadow-xl">
+              <div className="relative rounded-2xl bg-secondary/50 border border-border overflow-hidden shadow-xl">
                 {/* Interface mockup */}
-                <div className="absolute inset-4 rounded-xl bg-card shadow-lg overflow-hidden">
+                <div className="rounded-xl bg-card shadow-lg overflow-hidden">
                   {/* Header */}
                   <div className="h-12 bg-secondary/50 border-b border-border flex items-center px-4 gap-2">
                     <div className="w-3 h-3 rounded-full bg-destructive/50" />
                     <div className="w-3 h-3 rounded-full bg-warning/50" />
                     <div className="w-3 h-3 rounded-full bg-success/50" />
+                    <span className="ml-4 text-sm text-muted-foreground">XML Expert</span>
                   </div>
                   
                   {/* Content area */}
-                  <div className="p-6 space-y-4">
-                    {activeStep === 0 && (
-                      <div className="animate-fade-in">
-                        <div className="border-2 border-dashed border-primary/30 rounded-xl p-12 text-center">
-                          <Upload className="h-12 w-12 mx-auto text-primary mb-4" />
-                          <p className="text-muted-foreground">Перетащите файлы сюда</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {activeStep === 1 && (
-                      <div className="animate-fade-in space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-secondary rounded-lg">
-                          <FileSearch className="h-5 w-5 text-primary" />
-                          <span className="text-sm">Анализ: ПЗ_Раздел1.pdf</span>
-                        </div>
-                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                          <div className="h-full w-2/3 bg-primary rounded-full animate-pulse" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Определение XML-схемы...
-                        </p>
-                      </div>
-                    )}
-                    
-                    {activeStep === 2 && (
-                      <div className="animate-fade-in space-y-3">
-                        <div className="flex items-center gap-2 text-success">
-                          <CheckCircle className="h-5 w-5" />
-                          <span className="font-medium">Валидация XSD</span>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-success">
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Структура документа</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-success">
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Обязательные поля</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-success">
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Формат данных</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {activeStep === 3 && (
-                      <div className="animate-fade-in space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">result.xml</span>
-                          <span className="text-sm text-success">Готово</span>
-                        </div>
-                        <div className="bg-secondary/50 rounded-lg p-3 font-mono text-xs text-muted-foreground overflow-hidden">
-                          <div>&lt;?xml version="1.0"?&gt;</div>
-                          <div>&lt;ProjectDoc xmlns="..."&gt;</div>
-                          <div className="pl-4">&lt;Section id="1"&gt;</div>
-                          <div className="pl-8">...</div>
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground text-sm font-medium">
-                            <Download className="h-4 w-4 mr-2" />
-                            Скачать XML
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  <div className="p-6">
+                    {renderInterface()}
                   </div>
                 </div>
               </div>
