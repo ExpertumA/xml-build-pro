@@ -264,7 +264,7 @@ const ScrollSection = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-24">
           {/* Steps text */}
-          <div className="space-y-16 lg:space-y-24">
+          <div className="space-y-32 lg:space-y-48">
             {steps.map((step, index) => (
               <div
                 key={step.id}
