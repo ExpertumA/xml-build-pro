@@ -4,6 +4,7 @@ import HeroSection from "@/components/home/HeroSection";
 import ScrollSection from "@/components/home/ScrollSection";
 import SupportedDocumentsSection from "@/components/home/SupportedDocumentsSection";
 import PricingSection from "@/components/home/PricingSection";
+import SecuritySection from "@/components/home/SecuritySection";
 import CTASection from "@/components/home/CTASection";
 
 const Index = () => {
@@ -15,6 +16,7 @@ const Index = () => {
         <ScrollSection />
         <SupportedDocumentsSection />
         <PricingSection />
+        <SecuritySection />
         <CTASection />
       </main>
       <Footer />
