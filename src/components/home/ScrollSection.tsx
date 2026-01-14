@@ -198,41 +198,55 @@ const ScrollSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stepsRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  const handleStepClick = (index: number) => {
+    setActiveStep(index);
+    // Scroll to the step
+    const stepRef = stepsRefs.current[index];
+    if (stepRef) {
+      stepRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       if (!sectionRef.current) return;
 
-      const sectionTop = sectionRef.current.offsetTop;
-      const scrollPosition = window.scrollY - sectionTop + window.innerHeight / 2;
+      const sectionRect = sectionRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Trigger point at 30% from top of viewport for earlier switching
+      const triggerPoint = viewportHeight * 0.3;
 
       stepsRefs.current.forEach((ref, index) => {
         if (ref) {
-          const stepTop = ref.offsetTop;
-          const stepHeight = ref.offsetHeight;
+          const stepRect = ref.getBoundingClientRect();
+          const stepCenter = stepRect.top + stepRect.height / 2;
           
-          if (scrollPosition >= stepTop && scrollPosition < stepTop + stepHeight) {
+          // Switch when step center passes the trigger point
+          if (stepRect.top <= triggerPoint && stepRect.bottom >= triggerPoint) {
             setActiveStep(index);
           }
         }
       });
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const renderInterface = () => {
     switch (activeStep) {
       case 0:
-        return <UploadInterface />;
+        return <UploadInterface key="upload" />;
       case 1:
-        return <DetectionInterface />;
+        return <DetectionInterface key="detection" />;
       case 2:
-        return <ValidationInterface />;
+        return <ValidationInterface key="validation" />;
       case 3:
-        return <ResultInterface />;
+        return <ResultInterface key="result" />;
       default:
-        return <UploadInterface />;
+        return <UploadInterface key="upload-default" />;
     }
   };
 
@@ -250,12 +264,13 @@ const ScrollSection = () => {
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-24">
           {/* Steps text */}
-          <div className="space-y-24 lg:space-y-32">
+          <div className="space-y-16 lg:space-y-24">
             {steps.map((step, index) => (
               <div
                 key={step.id}
                 ref={(el) => (stepsRefs.current[index] = el)}
-                className={`transition-all duration-500 ${
+                onClick={() => handleStepClick(index)}
+                className={`transition-all duration-500 cursor-pointer hover:opacity-100 ${
                   activeStep === index ? "opacity-100" : "opacity-40"
                 }`}
               >
@@ -282,6 +297,22 @@ const ScrollSection = () => {
           {/* Sticky interface mockup */}
           <div className="hidden lg:block">
             <div className="sticky top-32">
+              {/* Step indicators */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                {steps.map((step, index) => (
+                  <button
+                    key={step.id}
+                    onClick={() => handleStepClick(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      activeStep === index 
+                        ? "w-8 bg-primary" 
+                        : "w-2 bg-border hover:bg-muted-foreground"
+                    }`}
+                    aria-label={`Шаг ${step.id}`}
+                  />
+                ))}
+              </div>
+              
               <div className="relative rounded-2xl bg-secondary/50 border border-border overflow-hidden shadow-xl">
                 {/* Interface mockup */}
                 <div className="rounded-xl bg-card shadow-lg overflow-hidden">
@@ -290,11 +321,11 @@ const ScrollSection = () => {
                     <div className="w-3 h-3 rounded-full bg-destructive/50" />
                     <div className="w-3 h-3 rounded-full bg-warning/50" />
                     <div className="w-3 h-3 rounded-full bg-success/50" />
-                    <span className="ml-4 text-sm text-muted-foreground">XML Expert</span>
+                    <span className="ml-4 text-sm text-muted-foreground">XML Expert — Шаг {activeStep + 1}</span>
                   </div>
                   
                   {/* Content area */}
-                  <div className="p-6">
+                  <div className="p-6 min-h-[400px]">
                     {renderInterface()}
                   </div>
                 </div>
