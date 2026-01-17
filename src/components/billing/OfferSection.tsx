@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,7 +106,6 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
   const [showSmsVerification, setShowSmsVerification] = useState(false);
   const [smsCode, setSmsCode] = useState("");
   const [phone, setPhone] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
@@ -118,7 +116,6 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
   };
 
   const handleConfirm = () => {
-    // For now, use checkbox method (SMS is optional/recommended)
     setShowSmsVerification(true);
   };
 
@@ -128,10 +125,8 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
       setDialogOpen(false);
       setShowSmsVerification(false);
       setSmsCode("");
-      toast({
-        title: "Оферта принята",
-        description: "Публичная оферта успешно принята",
-      });
+      setCheckboxChecked(false);
+      setScrolledToBottom(false);
     } else {
       toast({
         title: "Неверный код",
@@ -145,10 +140,8 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
     onAcceptOffer("checkbox");
     setDialogOpen(false);
     setShowSmsVerification(false);
-    toast({
-      title: "Оферта принята",
-      description: "Публичная оферта успешно принята",
-    });
+    setCheckboxChecked(false);
+    setScrolledToBottom(false);
   };
 
   const canConfirm = scrolledToBottom && checkboxChecked;

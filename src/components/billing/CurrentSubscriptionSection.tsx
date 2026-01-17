@@ -1,12 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, CreditCard, FileText, Infinity } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Calendar, CheckCircle2, CreditCard, Infinity, Zap } from "lucide-react";
 import type { SubscriptionType } from "@/lib/pricing";
 
 interface CurrentSubscriptionSectionProps {
@@ -28,55 +23,26 @@ const CurrentSubscriptionSection = ({
   onSubscribe,
   onManage,
 }: CurrentSubscriptionSectionProps) => {
-  const renderButton = (
-    text: string,
-    onClick: () => void,
-    variant: "default" | "outline" = "default",
-    icon?: React.ReactNode
-  ) => {
-    const button = (
-      <Button variant={variant} onClick={onClick} disabled={!offerAccepted}>
-        {icon}
-        {text}
-      </Button>
-    );
-
-    if (!offerAccepted) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>{button}</span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Для продолжения необходимо принять публичную оферту</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return button;
-  };
 
   if (subscriptionType === 'none' || !isActive) {
     return (
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Текущий тариф
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="py-6 text-center">
-            <p className="text-muted-foreground">
-              У вас нет активной подписки
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Выберите тариф для начала работы с сервисом
-            </p>
-          </div>
-          <div className="flex gap-3 justify-center">
-            {renderButton("Выбрать тариф", onSubscribe)}
+      <Card className="bg-muted/30">
+        <CardContent className="py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="font-medium">Тариф не выбран</p>
+                <p className="text-sm text-muted-foreground">
+                  Выберите тариф для начала работы с сервисом
+                </p>
+              </div>
+            </div>
+            <Button onClick={onSubscribe} disabled={!offerAccepted}>
+              Выбрать тариф
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -85,33 +51,29 @@ const CurrentSubscriptionSection = ({
 
   if (subscriptionType === 'pay_per_generation') {
     return (
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
-            Текущий тариф
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Badge className="bg-success/10 text-success hover:bg-success/20">
-              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-              Подписка активна
-            </Badge>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold">
-              Подписка с оплатой за генерацию
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Вы оплачиваете только фактическое формирование документов.
-              Повторная генерация оплачивается отдельно.
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            {renderButton("Управление", onManage, "outline")}
+      <Card className="bg-success/5 border-success/30">
+        <CardContent className="py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <Zap className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">Оплата за генерацию</p>
+                  <Badge className="bg-success/10 text-success hover:bg-success/20 text-xs">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Активен
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Оплата при каждой генерации документа
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={onSubscribe}>
+              Сменить тариф
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -120,40 +82,38 @@ const CurrentSubscriptionSection = ({
 
   if (subscriptionType === 'unlimited_expert') {
     return (
-      <Card className="border-primary/50">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2">
-            <Infinity className="h-5 w-5 text-primary" />
-            Текущий тариф
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
-              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-              Подписка без лимитов
-            </Badge>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-xl font-semibold">
-              XML-схема заключения экспертизы
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Без ограничений по количеству генераций
-            </p>
-          </div>
-
-          {expiresAt && (
-            <div className="flex items-center gap-2 text-lg">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <span>Действует до: <strong>{expiresAt}</strong></span>
+      <Card className="bg-primary/5 border-primary/30">
+        <CardContent className="py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Infinity className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium">Подписка без лимитов</p>
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-xs">
+                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                    Активен
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>XML-схема заключения экспертизы</span>
+                  {expiresAt && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        до {expiresAt}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          )}
-
-          <div className="flex gap-3">
-            {renderButton("Продлить подписку", onSubscribe)}
-            {renderButton("Управление", onManage, "outline")}
+            <Button variant="outline" size="sm" onClick={onSubscribe}>
+              Продлить
+            </Button>
           </div>
         </CardContent>
       </Card>

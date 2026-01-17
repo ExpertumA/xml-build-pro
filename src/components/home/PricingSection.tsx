@@ -1,51 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, ArrowRight, Zap, FileText, Infinity, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const plans = [
-  {
-    name: "Start",
-    price: "4 990",
-    period: "₽/мес",
-    description: "Для небольших проектов",
-    features: [
-      "До 10 документов в месяц",
-      "Все типы XML-схем",
-      "Валидация по XSD",
-      "Email поддержка",
-    ],
-    cta: "Начать",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "14 990",
-    period: "₽/мес",
-    description: "Для активных пользователей",
-    features: [
-      "До 50 документов в месяц",
-      "Приоритетная поддержка",
-      "API доступ",
-      "Экспорт отчётов",
-    ],
-    cta: "Выбрать Pro",
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    price: "По запросу",
-    period: "",
-    description: "Для крупных организаций",
-    features: [
-      "Безлимитные документы",
-      "Персональный менеджер",
-      "SLA 99.9%",
-      "Интеграция с системами",
-    ],
-    cta: "Связаться",
-    highlighted: false,
-  },
-];
 
 const PricingSection = () => {
   return (
@@ -56,59 +13,96 @@ const PricingSection = () => {
             Тарифы
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Выберите подходящий тариф для вашей организации
+            Сервис предоставляет доступ к формированию XML-документов в соответствии с требованиями Минстроя РФ
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-          {plans.map((plan, index) => (
-            <div 
-              key={index}
-              className={`relative p-6 rounded-2xl border transition-all duration-300 ${
-                plan.highlighted 
-                  ? "border-primary bg-card shadow-xl shadow-primary/10 scale-105" 
-                  : "border-border bg-card hover:border-primary/30 hover:shadow-lg"
-              }`}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">
-                    Популярный
-                  </span>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+          {/* Pay per generation */}
+          <Card className="relative p-6 rounded-2xl border transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
+            <CardContent className="p-0 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-primary" />
                 </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold mb-1">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{plan.description}</p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-sm text-muted-foreground">{plan.period}</span>
-                  )}
+                <div>
+                  <h3 className="font-semibold">Оплата за генерацию</h3>
+                  <p className="text-sm text-muted-foreground">Для проектных организаций</p>
                 </div>
               </div>
 
-              <ul className="space-y-2 mb-6">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-success shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Пояснительная записка</span>
+                  <span className="font-semibold">3 000 ₽</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Задание на проектирование</span>
+                  <span className="font-semibold">2 500 ₽</span>
+                </div>
+              </div>
+
+              <ul className="space-y-1.5 pt-2">
+                <li className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-success shrink-0" />
+                  <span>Оплата только за генерацию</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-success shrink-0" />
+                  <span>Без ограничений по срокам</span>
+                </li>
               </ul>
 
-              <Button 
-                className="w-full" 
-                variant={plan.highlighted ? "default" : "outline"}
-                asChild
-              >
-                <Link to={plan.name === "Enterprise" ? "#" : "/register"}>
-                  {plan.cta}
-                </Link>
+              <Button className="w-full" variant="outline" asChild>
+                <Link to="/register">Начать работу</Link>
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Unlimited for experts */}
+          <Card className="relative p-6 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent transition-all duration-300 hover:shadow-lg">
+            <div className="absolute -top-3 right-4">
+              <Badge className="bg-primary text-primary-foreground">
+                <Infinity className="h-3 w-3 mr-1" />
+                Безлимит
+              </Badge>
             </div>
-          ))}
+            <CardContent className="p-0 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Подписка без лимитов</h3>
+                  <p className="text-sm text-muted-foreground">Для экспертных организаций</p>
+                </div>
+              </div>
+
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold">12 000 ₽</span>
+                <span className="text-sm text-muted-foreground">/ месяц</span>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                XML-схема заключения экспертизы
+              </p>
+
+              <ul className="space-y-1.5 pt-2">
+                <li className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-success shrink-0" />
+                  <span>Неограниченно генераций</span>
+                </li>
+                <li className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-success shrink-0" />
+                  <span>Приоритетная обработка</span>
+                </li>
+              </ul>
+
+              <Button className="w-full" asChild>
+                <Link to="/register">Оформить подписку</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="text-center">
@@ -116,7 +110,7 @@ const PricingSection = () => {
             to="/pricing" 
             className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
           >
-            Смотреть все тарифы
+            Подробнее о тарифах
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
