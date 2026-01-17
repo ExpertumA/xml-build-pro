@@ -1,93 +1,118 @@
-// Document type to generations cost mapping
-// This is hidden from users - they only see the final count
-export const DOCUMENT_GENERATION_COSTS: Record<string, number> = {
-  design_assignment: 1,          // Задание на проектирование
-  explanatory_note: 2,           // Пояснительная записка (Раздел 1)
-  market_analysis: 2,            // Результаты конъюнктурного анализа
-  work_volume: 3,                // Ведомость объёмов работ
-  expertise_conclusion: 4,       // XML-схема заключения экспертизы
+// Document type to price mapping (synced with database)
+export const DOCUMENT_PRICES_MAP: Record<string, number> = {
+  design_assignment: 2500,
+  explanatory_note: 3000,
+  engineering_xml: 0,
+  expertise_conclusion: 0, // Unlimited subscription
 };
 
 // Document type labels (for display)
 export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   design_assignment: 'Задание на проектирование',
-  explanatory_note: 'Пояснительная записка',
-  market_analysis: 'Результаты конъюнктурного анализа',
-  work_volume: 'Ведомость объёмов работ',
+  explanatory_note: 'Пояснительная записка (Раздел №1)',
+  engineering_xml: 'XML-схемы этапа инженерных изысканий и проектирования',
   expertise_conclusion: 'XML-схема заключения экспертизы',
 };
 
-// Get generations cost for a document type
-export function getGenerationsCost(documentType: string): number {
-  return DOCUMENT_GENERATION_COSTS[documentType] || 1;
+// Get price for a document type
+export function getDocumentPrice(documentType: string): number {
+  return DOCUMENT_PRICES_MAP[documentType] || 0;
 }
 
-// Check if user can generate document
+// Check if document is available for subscription type
+export type SubscriptionType = 'pay_per_generation' | 'unlimited_expert' | 'none';
+
 export interface GenerationCheckResult {
   canGenerate: boolean;
-  blockReason?: 'offer_not_accepted' | 'no_package' | 'insufficient_generations';
-  requiredGenerations: number;
-  remainingGenerations: number;
+  blockReason?: 'offer_not_accepted' | 'no_subscription' | 'subscription_expired' | 'document_not_available';
+  priceRub: number;
+  documentName: string;
+  subscriptionType: SubscriptionType;
 }
 
 export function checkGenerationAvailability(
   documentType: string,
   offerAccepted: boolean,
-  packageStatus: 'active' | 'exhausted' | 'expired' | 'inactive',
-  remainingGenerations: number
+  subscriptionType: SubscriptionType,
+  subscriptionActive: boolean
 ): GenerationCheckResult {
-  const requiredGenerations = getGenerationsCost(documentType);
+  const priceRub = getDocumentPrice(documentType);
+  const documentName = DOCUMENT_TYPE_LABELS[documentType] || documentType;
 
   if (!offerAccepted) {
     return {
       canGenerate: false,
       blockReason: 'offer_not_accepted',
-      requiredGenerations,
-      remainingGenerations,
+      priceRub,
+      documentName,
+      subscriptionType,
     };
   }
 
-  if (packageStatus !== 'active' && packageStatus !== 'exhausted') {
+  if (subscriptionType === 'none') {
     return {
       canGenerate: false,
-      blockReason: 'no_package',
-      requiredGenerations,
-      remainingGenerations,
+      blockReason: 'no_subscription',
+      priceRub,
+      documentName,
+      subscriptionType,
     };
   }
 
-  if (remainingGenerations < requiredGenerations) {
+  if (!subscriptionActive) {
     return {
       canGenerate: false,
-      blockReason: 'insufficient_generations',
-      requiredGenerations,
-      remainingGenerations,
+      blockReason: 'subscription_expired',
+      priceRub,
+      documentName,
+      subscriptionType,
     };
+  }
+
+  // Check document availability for subscription type
+  if (subscriptionType === 'unlimited_expert') {
+    if (documentType !== 'expertise_conclusion') {
+      return {
+        canGenerate: false,
+        blockReason: 'document_not_available',
+        priceRub,
+        documentName,
+        subscriptionType,
+      };
+    }
+  }
+
+  if (subscriptionType === 'pay_per_generation') {
+    if (documentType === 'expertise_conclusion') {
+      return {
+        canGenerate: false,
+        blockReason: 'document_not_available',
+        priceRub,
+        documentName,
+        subscriptionType,
+      };
+    }
+    // Check if document is available (not "coming soon")
+    if (documentType === 'engineering_xml') {
+      return {
+        canGenerate: false,
+        blockReason: 'document_not_available',
+        priceRub,
+        documentName,
+        subscriptionType,
+      };
+    }
   }
 
   return {
     canGenerate: true,
-    requiredGenerations,
-    remainingGenerations,
+    priceRub,
+    documentName,
+    subscriptionType,
   };
 }
 
-// Pluralize "генерация" in Russian
-export function getGenerationsWord(count: number): string {
-  const lastDigit = count % 10;
-  const lastTwoDigits = count % 100;
-
-  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-    return 'генераций';
-  }
-
-  if (lastDigit === 1) {
-    return 'генерация';
-  }
-
-  if (lastDigit >= 2 && lastDigit <= 4) {
-    return 'генерации';
-  }
-
-  return 'генераций';
+// Format price for display
+export function formatPriceRub(price: number): string {
+  return `${price.toLocaleString('ru-RU')} ₽`;
 }

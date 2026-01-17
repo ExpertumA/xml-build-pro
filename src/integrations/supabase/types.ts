@@ -110,6 +110,7 @@ export type Database = {
       }
       company_subscriptions: {
         Row: {
+          balance_rub: number | null
           company_id: string
           created_at: string
           credits_remaining: number
@@ -119,8 +120,10 @@ export type Database = {
           package_name: string | null
           plan_id: string
           started_at: string
+          subscription_type: string | null
         }
         Insert: {
+          balance_rub?: number | null
           company_id: string
           created_at?: string
           credits_remaining?: number
@@ -130,8 +133,10 @@ export type Database = {
           package_name?: string | null
           plan_id: string
           started_at?: string
+          subscription_type?: string | null
         }
         Update: {
+          balance_rub?: number | null
           company_id?: string
           created_at?: string
           credits_remaining?: number
@@ -141,6 +146,7 @@ export type Database = {
           package_name?: string | null
           plan_id?: string
           started_at?: string
+          subscription_type?: string | null
         }
         Relationships: [
           {
@@ -158,6 +164,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      document_prices: {
+        Row: {
+          created_at: string
+          document_name: string
+          document_type: string
+          id: string
+          is_available: boolean | null
+          price_rub: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          document_type: string
+          id?: string
+          is_available?: boolean | null
+          price_rub: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          id?: string
+          is_available?: boolean | null
+          price_rub?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       documents: {
         Row: {
@@ -227,6 +263,51 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generation_transactions: {
+        Row: {
+          amount_rub: number
+          company_id: string
+          created_at: string
+          document_type: string
+          id: string
+          status: string
+          subscription_id: string | null
+        }
+        Insert: {
+          amount_rub: number
+          company_id: string
+          created_at?: string
+          document_type: string
+          id?: string
+          status?: string
+          subscription_id?: string | null
+        }
+        Update: {
+          amount_rub?: number
+          company_id?: string
+          created_at?: string
+          document_type?: string
+          id?: string
+          status?: string
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generation_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "company_subscriptions"
             referencedColumns: ["id"]
           },
         ]

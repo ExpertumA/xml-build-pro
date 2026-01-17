@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Check, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
-import GenerationGateCheck from "@/components/billing/GenerationGateCheck";
-import GenerationConfirmation from "@/components/billing/GenerationConfirmation";
-import { checkGenerationAvailability, getGenerationsCost } from "@/lib/generations";
-import type { GateBlockReason } from "@/components/billing/GenerationGateCheck";
+import GenerationGateCheckNew from "@/components/billing/GenerationGateCheckNew";
+import GenerationPaymentConfirmation from "@/components/billing/GenerationPaymentConfirmation";
+import { checkGenerationAvailability, formatPriceRub, type SubscriptionType } from "@/lib/generations";
+import type { GateBlockReason } from "@/components/billing/GenerationGateCheckNew";
 
 interface GenerationStepProps {
   documentType: string;
@@ -15,9 +15,9 @@ interface GenerationStepProps {
   onBack: () => void;
   // In production, these would come from context/store
   offerAccepted?: boolean;
-  packageStatus?: 'active' | 'exhausted' | 'expired' | 'inactive';
-  remainingGenerations?: number;
-  onDeductGenerations?: (amount: number) => void;
+  subscriptionType?: SubscriptionType;
+  subscriptionActive?: boolean;
+  onRecordGeneration?: (documentType: string, amountRub: number) => void;
 }
 
 const steps = [
@@ -31,9 +31,9 @@ const GenerationStep = ({
   onComplete, 
   onBack,
   offerAccepted = true,
-  packageStatus = 'active',
-  remainingGenerations = 18,
-  onDeductGenerations,
+  subscriptionType = 'pay_per_generation',
+  subscriptionActive = true,
+  onRecordGeneration,
 }: GenerationStepProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -42,17 +42,17 @@ const GenerationStep = ({
   const generationCheck = checkGenerationAvailability(
     documentType,
     offerAccepted,
-    packageStatus,
-    remainingGenerations
+    subscriptionType,
+    subscriptionActive
   );
 
   const startGeneration = useCallback(() => {
-    // Deduct generations immediately
-    if (onDeductGenerations) {
-      onDeductGenerations(generationCheck.requiredGenerations);
+    // Record generation transaction
+    if (onRecordGeneration && generationCheck.priceRub > 0) {
+      onRecordGeneration(documentType, generationCheck.priceRub);
     }
     setIsGenerating(true);
-  }, [onDeductGenerations, generationCheck.requiredGenerations]);
+  }, [onRecordGeneration, documentType, generationCheck.priceRub]);
 
   useEffect(() => {
     if (!isGenerating) return;
@@ -101,10 +101,10 @@ const GenerationStep = ({
           </p>
         </div>
 
-        <GenerationGateCheck
+        <GenerationGateCheckNew
           blockReason={generationCheck.blockReason as GateBlockReason}
-          requiredGenerations={generationCheck.requiredGenerations}
-          remainingGenerations={generationCheck.remainingGenerations}
+          documentName={generationCheck.documentName}
+          subscriptionType={generationCheck.subscriptionType}
         />
 
         <div className="flex justify-center">
@@ -124,23 +124,35 @@ const GenerationStep = ({
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-2">Генерация XML</h2>
           <p className="text-muted-foreground">
-            Проверьте информацию перед запуском генерации
+            {generationCheck.documentName}
           </p>
         </div>
 
-        <GenerationConfirmation
-          generationsRequired={generationCheck.requiredGenerations}
-          documentType={documentType}
+        <GenerationPaymentConfirmation
+          documentName={generationCheck.documentName}
+          priceRub={generationCheck.priceRub}
+          subscriptionType={generationCheck.subscriptionType}
         />
 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Осталось генераций после списания</p>
-                <p className="text-2xl font-bold">
-                  {remainingGenerations - generationCheck.requiredGenerations}
-                </p>
+                {generationCheck.priceRub > 0 ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">Стоимость генерации</p>
+                    <p className="text-2xl font-bold">
+                      {formatPriceRub(generationCheck.priceRub)}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground">Генерация</p>
+                    <p className="text-xl font-semibold text-success">
+                      Включена в подписку
+                    </p>
+                  </>
+                )}
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={onBack}>
