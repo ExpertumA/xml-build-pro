@@ -24,6 +24,9 @@ export type Database = {
           kpp: string | null
           legal_address: string | null
           name: string
+          offer_accepted: boolean | null
+          offer_accepted_at: string | null
+          offer_version: string | null
           updated_at: string
         }
         Insert: {
@@ -35,6 +38,9 @@ export type Database = {
           kpp?: string | null
           legal_address?: string | null
           name: string
+          offer_accepted?: boolean | null
+          offer_accepted_at?: string | null
+          offer_version?: string | null
           updated_at?: string
         }
         Update: {
@@ -46,6 +52,9 @@ export type Database = {
           kpp?: string | null
           legal_address?: string | null
           name?: string
+          offer_accepted?: boolean | null
+          offer_accepted_at?: string | null
+          offer_version?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -297,6 +306,158 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offer_acceptances: {
+        Row: {
+          acceptance_method: string
+          accepted_at: string
+          company_id: string
+          created_at: string
+          id: string
+          ip_address: unknown
+          offer_version: string
+          phone: string | null
+          sms_code_used: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          acceptance_method: string
+          accepted_at?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          offer_version?: string
+          phone?: string | null
+          sms_code_used?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          acceptance_method?: string
+          accepted_at?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          offer_version?: string
+          phone?: string | null
+          sms_code_used?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_acceptances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          card_brand: string | null
+          card_exp_month: number | null
+          card_exp_year: number | null
+          card_last_four: string | null
+          company_id: string
+          created_at: string
+          id: string
+          is_default: boolean
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last_four?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          card_brand?: string | null
+          card_exp_month?: number | null
+          card_exp_year?: number | null
+          card_last_four?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_methods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          id: string
+          invoice_id: string | null
+          paid_at: string | null
+          payment_method: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          paid_at?: string | null
+          payment_method: string
+          status: string
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          paid_at?: string | null
+          payment_method?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
         ]
