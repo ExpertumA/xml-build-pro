@@ -12,7 +12,7 @@ const DashboardMockup = () => (
       <div className="w-3 h-3 rounded-full bg-success/50" />
       <span className="ml-4 text-xs text-muted-foreground">XML Expert — Личный кабинет</span>
     </div>
-    
+
     <div className="flex">
       {/* Mini sidebar */}
       <div className="w-12 bg-secondary/30 border-r border-border py-3 flex flex-col items-center gap-3">
@@ -26,7 +26,7 @@ const DashboardMockup = () => (
           <Upload className="h-3 w-3 text-muted-foreground" />
         </div>
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 p-4">
         {/* Stats cards */}
@@ -48,7 +48,7 @@ const DashboardMockup = () => (
             <p className="text-lg font-semibold text-primary">76</p>
           </div>
         </div>
-        
+
         {/* Documents table */}
         <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="p-2 border-b border-border bg-secondary/30">
@@ -95,20 +95,18 @@ const HeroSection = () => {
           {/* Left: Text content */}
           <div className="space-y-8">
             <h1 className="text-display text-foreground animate-fade-in">
-              Перевод проектной документации в{" "}
-              <span className="text-gradient">машиночитаемый XML</span>
+              Перевод проектной документации в <span className="text-gradient">машиночитаемый XML</span>
             </h1>
-            
+
             <p className="text-xl text-muted-foreground animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              Инженерные изыскания и проектирование. Проверка по XSD. 
-              Готово для экспертизы по требованиям Минстроя РФ.
+              Инженерные изыскания и проектирование. Проверка по XSD. Готово для экспертизы по требованиям Минстроя РФ.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <Button size="xl" variant="hero" asChild>
                 <Link to="/dashboard">
                   <Upload className="mr-2 h-5 w-5" />
-                  Загрузить документ
+                  Создать XML-документ
                 </Link>
               </Button>
               <Button size="xl" variant="heroOutline" asChild>
