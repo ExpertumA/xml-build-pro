@@ -22,6 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Check, CreditCard, FileText, Zap, Building2, Infinity, Users, Briefcase, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+// Force module refresh for HMR
+
 const DashboardBillingDocuments = () => {
   const { toast } = useToast();
   const {
