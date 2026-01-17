@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Loader2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Check, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import GenerationGateCheck from "@/components/billing/GenerationGateCheck";
+import GenerationConfirmation from "@/components/billing/GenerationConfirmation";
+import { checkGenerationAvailability, getGenerationsCost } from "@/lib/generations";
+import type { GateBlockReason } from "@/components/billing/GenerationGateCheck";
 
 interface GenerationStepProps {
+  documentType: string;
   onComplete: () => void;
+  onBack: () => void;
+  // In production, these would come from context/store
+  offerAccepted?: boolean;
+  packageStatus?: 'active' | 'exhausted' | 'expired' | 'inactive';
+  remainingGenerations?: number;
+  onDeductGenerations?: (amount: number) => void;
 }
 
 const steps = [
@@ -14,11 +26,37 @@ const steps = [
   { id: 3, title: "Проверка по XSD Минстроя РФ", duration: 2500 },
 ];
 
-const GenerationStep = ({ onComplete }: GenerationStepProps) => {
+const GenerationStep = ({ 
+  documentType,
+  onComplete, 
+  onBack,
+  offerAccepted = true,
+  packageStatus = 'active',
+  remainingGenerations = 18,
+  onDeductGenerations,
+}: GenerationStepProps) => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
+  const generationCheck = checkGenerationAvailability(
+    documentType,
+    offerAccepted,
+    packageStatus,
+    remainingGenerations
+  );
+
+  const startGeneration = useCallback(() => {
+    // Deduct generations immediately
+    if (onDeductGenerations) {
+      onDeductGenerations(generationCheck.requiredGenerations);
+    }
+    setIsGenerating(true);
+  }, [onDeductGenerations, generationCheck.requiredGenerations]);
+
   useEffect(() => {
+    if (!isGenerating) return;
+
     let stepIndex = 0;
     let progressInterval: NodeJS.Timeout;
 
@@ -50,8 +88,77 @@ const GenerationStep = ({ onComplete }: GenerationStepProps) => {
     return () => {
       if (progressInterval) clearInterval(progressInterval);
     };
-  }, [onComplete]);
+  }, [isGenerating, onComplete]);
 
+  // Show gate check if user can't generate
+  if (!generationCheck.canGenerate && !isGenerating) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Генерация XML</h2>
+          <p className="text-muted-foreground">
+            Невозможно начать генерацию
+          </p>
+        </div>
+
+        <GenerationGateCheck
+          blockReason={generationCheck.blockReason as GateBlockReason}
+          requiredGenerations={generationCheck.requiredGenerations}
+          remainingGenerations={generationCheck.remainingGenerations}
+        />
+
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Назад к документам
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show confirmation before starting generation
+  if (!isGenerating) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Генерация XML</h2>
+          <p className="text-muted-foreground">
+            Проверьте информацию перед запуском генерации
+          </p>
+        </div>
+
+        <GenerationConfirmation
+          generationsRequired={generationCheck.requiredGenerations}
+          documentType={documentType}
+        />
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Осталось генераций после списания</p>
+                <p className="text-2xl font-bold">
+                  {remainingGenerations - generationCheck.requiredGenerations}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={onBack}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Назад
+                </Button>
+                <Button onClick={startGeneration}>
+                  Сформировать XML
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show generation progress
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div className="text-center">
