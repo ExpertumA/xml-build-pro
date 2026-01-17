@@ -69,7 +69,9 @@ const DashboardUpload = () => {
       case 4:
         return (
           <GenerationStep
+            documentType={documentType || "explanatory_note"}
             onComplete={handleGenerationComplete}
+            onBack={prevStep}
           />
         );
       case 5:
