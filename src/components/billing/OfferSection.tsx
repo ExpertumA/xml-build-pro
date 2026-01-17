@@ -148,28 +148,27 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
 
   if (offerAccepted && offerDetails) {
     return (
-      <Card className="border-success/50 bg-success/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Shield className="h-5 w-5 text-success" />
-            Юридический статус и оферта
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-success mt-0.5" />
-            <div className="space-y-2">
-              <p className="font-medium text-success">Публичная оферта принята</p>
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>Дата и время акцепта: {offerDetails.acceptedAt}</p>
-                <p>Версия оферты: {offerDetails.version}</p>
-                <p>Способ акцепта: {
-                  offerDetails.method === 'sms' ? 'SMS-код' :
-                  offerDetails.method === 'payment' ? 'Оплата' : 'Подтверждение в ЛК'
-                }</p>
-                {offerDetails.ip && <p>IP-адрес: {offerDetails.ip}</p>}
+      <Card className="border-success/30">
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-success/10 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-success" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Оферта принята</p>
+                <p className="text-xs text-muted-foreground">
+                  {offerDetails.acceptedAt} • v{offerDetails.version} • {
+                    offerDetails.method === 'sms' ? 'SMS' :
+                    offerDetails.method === 'payment' ? 'Оплата' : 'ЛК'
+                  }
+                </p>
               </div>
             </div>
+            <Button variant="ghost" size="sm" onClick={() => setDialogOpen(true)}>
+              <FileText className="h-3.5 w-3.5 mr-1.5" />
+              Открыть
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -178,31 +177,29 @@ const OfferSection = ({ offerAccepted, offerDetails, onAcceptOffer }: OfferSecti
 
   return (
     <>
-      <Card className="border-warning/50 bg-warning/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Shield className="h-5 w-5" />
-            Юридический статус и оферта
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-warning">Оферта не принята</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Для использования сервиса необходимо принять условия публичной оферты.
-              </p>
+      <Card className="border-warning/30 bg-warning/5">
+        <CardContent className="py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-warning/10 flex items-center justify-center">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+              </div>
+              <div>
+                <p className="font-medium text-sm text-warning">Оферта не принята</p>
+                <p className="text-xs text-muted-foreground">
+                  Для активации тарифа необходимо принять оферту
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-3 mt-4">
-            <Button variant="outline" onClick={() => setDialogOpen(true)}>
-              <FileText className="h-4 w-4 mr-2" />
-              Открыть оферту
-            </Button>
-            <Button onClick={() => setDialogOpen(true)}>
-              Принять оферту
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setDialogOpen(true)}>
+                <FileText className="h-3.5 w-3.5 mr-1.5" />
+                Открыть
+              </Button>
+              <Button size="sm" onClick={() => setDialogOpen(true)}>
+                Принять
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
