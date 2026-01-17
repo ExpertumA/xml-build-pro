@@ -12,9 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import DashboardDocuments from "./pages/DashboardDocuments";
 import DashboardDocument from "./pages/DashboardDocument";
 import DashboardUpload from "./pages/DashboardUpload";
-import DashboardBilling from "./pages/DashboardBilling";
+import DashboardBillingDocuments from "./pages/DashboardBillingDocuments";
 import DashboardSettings from "./pages/DashboardSettings";
-import DashboardDocumentFlow from "./pages/DashboardDocumentFlow";
 import DashboardCompany from "./pages/DashboardCompany";
 import NotFound from "./pages/NotFound";
 
@@ -36,9 +35,8 @@ const App = () => (
           <Route path="/dashboard/documents" element={<DashboardDocuments />} />
           <Route path="/dashboard/documents/:id" element={<DashboardDocument />} />
           <Route path="/dashboard/upload" element={<DashboardUpload />} />
-          <Route path="/dashboard/billing" element={<DashboardBilling />} />
+          <Route path="/dashboard/billing-documents" element={<DashboardBillingDocuments />} />
           <Route path="/dashboard/settings" element={<DashboardSettings />} />
-          <Route path="/dashboard/document-flow" element={<DashboardDocumentFlow />} />
           <Route path="/dashboard/company" element={<DashboardCompany />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

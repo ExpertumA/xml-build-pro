@@ -3,13 +3,12 @@ import {
   FileCode2, 
   LayoutDashboard, 
   FileText, 
-  CreditCard, 
   Settings, 
   LogOut,
   Menu,
   X,
-  Receipt,
-  Building2
+  Building2,
+  Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -21,8 +20,7 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "Документы", href: "/dashboard/documents", icon: FileText },
-  { name: "Документооборот", href: "/dashboard/document-flow", icon: Receipt },
-  { name: "Подписка", href: "/dashboard/billing", icon: CreditCard },
+  { name: "Биллинг и документы", href: "/dashboard/billing-documents", icon: Wallet },
   { name: "Компания", href: "/dashboard/company", icon: Building2 },
   { name: "Настройки", href: "/dashboard/settings", icon: Settings },
 ];
