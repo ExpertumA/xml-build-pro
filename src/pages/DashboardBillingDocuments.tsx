@@ -8,57 +8,29 @@ import ClosingDocumentsSection from "@/components/billing/ClosingDocumentsSectio
 import PaymentHistorySection from "@/components/billing/PaymentHistorySection";
 import PackagePurchaseDialog from "@/components/billing/PackagePurchaseDialog";
 import { useToast } from "@/hooks/use-toast";
-import type { PackageStatus } from "@/components/billing/GenerationsPackageSection";
+import { useCompany } from "@/hooks/useCompany";
+import { useBillingData } from "@/hooks/useBillingData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DashboardBillingDocuments = () => {
   const { toast } = useToast();
-  
-  // Mock state - in production, this would come from the database
-  const [offerAccepted, setOfferAccepted] = useState(false);
-  const [offerDetails, setOfferDetails] = useState<{
-    acceptedAt: string;
-    version: string;
-    method: string;
-    ip?: string;
-  } | undefined>(undefined);
+  const { company, loading: companyLoading } = useCompany();
+  const {
+    loading: billingLoading,
+    offerAccepted,
+    offerDetails,
+    packageData,
+    plans,
+    acceptOffer,
+    activatePackage,
+  } = useBillingData(company?.id || null);
 
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
-  // Mock package data
-  const [packageData, setPackageData] = useState<{
-    name: string;
-    status: PackageStatus;
-    generationsRemaining: number;
-    generationsTotal: number;
-    expiresAt: string;
-  }>({
-    name: "Pro",
-    status: 'active',
-    generationsRemaining: 18,
-    generationsTotal: 30,
-    expiresAt: "15.02.2026",
-  });
+  const loading = companyLoading || billingLoading;
 
-  const handleAcceptOffer = (method: string, phone?: string) => {
-    const now = new Date();
-    const formattedDate = now.toLocaleString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    setOfferAccepted(true);
-    setOfferDetails({
-      acceptedAt: formattedDate,
-      version: "1.0",
-      method: method,
-      ip: "192.168.1.1", // In production, get from server
-    });
-
-    // In production, save to database via Supabase
-    console.log("Offer accepted:", { method, phone, timestamp: now.toISOString() });
+  const handleAcceptOffer = async (method: string, phone?: string) => {
+    await acceptOffer(method, phone);
   };
 
   const handleBuyPackage = () => {
@@ -69,37 +41,23 @@ const DashboardBillingDocuments = () => {
     setPurchaseDialogOpen(true);
   };
 
-  const handlePurchaseCard = (packageId: string) => {
-    toast({
-      title: "Переход к оплате",
-      description: `Оплата пакета ${packageId.toUpperCase()} картой...`,
-    });
-    // In production, redirect to payment gateway
-    // After successful payment, update package data
-    const packageConfig: Record<string, { generations: number; name: string }> = {
-      start: { generations: 10, name: 'Start' },
-      pro: { generations: 30, name: 'Pro' },
-      expert: { generations: 60, name: 'Expert' },
+  const handlePurchaseCard = async (packageId: string) => {
+    // Find plan by package name (START, PRO, EXPERT)
+    const packageNameMap: Record<string, string> = {
+      start: "START",
+      pro: "PRO",
+      expert: "EXPERT",
+      test: "TEST",
     };
     
-    const selectedPkg = packageConfig[packageId];
-    if (selectedPkg) {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 30);
-      
-      setPackageData({
-        name: selectedPkg.name,
-        status: 'active',
-        generationsRemaining: selectedPkg.generations,
-        generationsTotal: selectedPkg.generations,
-        expiresAt: expiresAt.toLocaleDateString('ru-RU'),
-      });
-
-      toast({
-        title: "Пакет активирован",
-        description: `Пакет ${selectedPkg.name} успешно активирован. Чек отправлен на email.`,
-      });
+    const planName = packageNameMap[packageId];
+    const plan = plans.find((p) => p.name === planName);
+    
+    if (plan) {
+      await activatePackage(plan.id, planName === "TEST");
     }
+    
+    setPurchaseDialogOpen(false);
   };
 
   const handlePurchaseInvoice = (packageId: string, inn: string, companyName: string) => {
@@ -108,6 +66,7 @@ const DashboardBillingDocuments = () => {
       title: "Счёт сформирован",
       description: "Счёт на оплату создан и доступен для скачивания",
     });
+    setPurchaseDialogOpen(false);
   };
 
   const handleAddCard = () => {
@@ -120,6 +79,37 @@ const DashboardBillingDocuments = () => {
   const handleCreateInvoice = (inn: string, companyName: string) => {
     console.log("Creating invoice for:", { inn, companyName });
   };
+
+  // Convert packageData to the format expected by GenerationsPackageSection
+  const packageDataForSection = packageData
+    ? {
+        name: packageData.name,
+        status: packageData.status,
+        generationsRemaining: packageData.generationsRemaining,
+        generationsTotal: packageData.generationsTotal,
+        expiresAt: packageData.expiresAt,
+      }
+    : undefined;
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-2xl font-semibold">Биллинг и документы</h1>
+            <p className="text-muted-foreground">
+              Управление пакетами генераций, счетами и закрывающими документами
+            </p>
+          </div>
+          <div className="space-y-4">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -141,7 +131,7 @@ const DashboardBillingDocuments = () => {
         {/* Block B: Generations Package */}
         <GenerationsPackageSection
           offerAccepted={offerAccepted}
-          packageData={packageData}
+          packageData={packageDataForSection}
           onBuyPackage={handleBuyPackage}
           onTopUp={handleTopUp}
         />
@@ -169,6 +159,7 @@ const DashboardBillingDocuments = () => {
         onOpenChange={setPurchaseDialogOpen}
         onPurchaseCard={handlePurchaseCard}
         onPurchaseInvoice={handlePurchaseInvoice}
+        plans={plans}
       />
     </DashboardLayout>
   );

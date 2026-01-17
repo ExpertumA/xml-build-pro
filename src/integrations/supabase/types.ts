@@ -116,6 +116,7 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          package_name: string | null
           plan_id: string
           started_at: string
         }
@@ -126,6 +127,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          package_name?: string | null
           plan_id: string
           started_at?: string
         }
@@ -136,6 +138,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          package_name?: string | null
           plan_id?: string
           started_at?: string
         }
