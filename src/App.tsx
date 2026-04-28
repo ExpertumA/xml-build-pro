@@ -11,8 +11,6 @@ import Support from "./pages/Support";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import DashboardDocuments from "./pages/DashboardDocuments";
-import DashboardDocument from "./pages/DashboardDocument";
 import DashboardUpload from "./pages/DashboardUpload";
 import DashboardBillingDocuments from "./pages/DashboardBillingDocuments";
 import DashboardProjects from "./pages/DashboardProjects";
@@ -45,8 +43,8 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/documents" element={<DashboardDocuments />} />
-          <Route path="/dashboard/documents/:id" element={<DashboardDocument />} />
+          <Route path="/dashboard/documents" element={<Navigate to="/dashboard/projects" replace />} />
+          <Route path="/dashboard/documents/:id" element={<Navigate to="/dashboard/projects" replace />} />
           <Route path="/dashboard/upload" element={<DashboardUpload />} />
           <Route path="/dashboard/projects" element={<DashboardProjects />} />
           <Route path="/dashboard/projects/new" element={<DashboardProjectNew />} />
