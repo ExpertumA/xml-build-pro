@@ -224,7 +224,10 @@ const DashboardProjectDetail = () => {
                         <TableHead>Дата</TableHead>
                         <TableHead>Автор</TableHead>
                         <TableHead>XSD</TableHead>
+                        <TableHead>Ошибок</TableHead>
+                        <TableHead className="hidden lg:table-cell">Размер</TableHead>
                         <TableHead className="hidden md:table-cell">Checksum</TableHead>
+                        <TableHead className="hidden xl:table-cell">Заметка</TableHead>
                         <TableHead className="text-right">Действия</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -232,7 +235,7 @@ const DashboardProjectDetail = () => {
                       {project.xmlVersions.map((v) => (
                         <TableRow key={v.id}>
                           <TableCell className="font-medium">{v.version}</TableCell>
-                          <TableCell className="text-muted-foreground">{v.date}</TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap">{v.date}</TableCell>
                           <TableCell className="text-muted-foreground">{v.author}</TableCell>
                           <TableCell>
                             {v.xsdPassed ? (
@@ -245,17 +248,40 @@ const DashboardProjectDetail = () => {
                               </Badge>
                             )}
                           </TableCell>
+                          <TableCell className="text-muted-foreground">{v.errorsCount ?? 0}</TableCell>
+                          <TableCell className="hidden lg:table-cell text-muted-foreground">
+                            {v.sizeKb ? `${v.sizeKb} КБ` : "—"}
+                          </TableCell>
                           <TableCell className="hidden md:table-cell text-muted-foreground font-mono text-xs">
                             {v.checksum}
                           </TableCell>
+                          <TableCell className="hidden xl:table-cell text-muted-foreground text-xs max-w-[280px] truncate">
+                            {v.note ?? "—"}
+                          </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toast.success("Скачивание началось")}
-                            >
-                              <Download className="h-4 w-4 mr-1" /> Скачать
-                            </Button>
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toast("Открыт предпросмотр версии")}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toast("Сравнение с предыдущей версией")}
+                              >
+                                Сравнить
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toast.success("Скачивание началось")}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
