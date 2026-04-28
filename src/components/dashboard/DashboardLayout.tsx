@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   FileCode2, 
   LayoutDashboard, 
-  FileText, 
   Settings, 
   LogOut,
   Menu,
