@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -16,6 +17,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft,
   Download,
   FileText,
@@ -24,8 +33,15 @@ import {
   Plus,
   CheckCircle2,
   AlertTriangle,
+  ClipboardList,
+  FileText as FileTextIcon,
 } from "lucide-react";
-import { getProject } from "@/lib/projectsData";
+import {
+  getProject,
+  DOCUMENT_KIND_LABEL,
+  type DocumentKind,
+} from "@/lib/projectsData";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
   "Загрузка",
@@ -37,10 +53,33 @@ const STEPS = [
   "Готово",
 ];
 
+const DOC_KIND_OPTIONS: {
+  id: DocumentKind;
+  label: string;
+  description: string;
+  icon: typeof FileText;
+}[] = [
+  {
+    id: "explanatory_note",
+    label: "Пояснительная записка",
+    description: "Раздел №1 проектной документации",
+    icon: FileTextIcon,
+  },
+  {
+    id: "design_assignment",
+    label: "Задание на проектирование",
+    description: "Исходные требования к проекту",
+    icon: ClipboardList,
+  },
+];
+
 const DashboardProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const project = id ? getProject(id) : undefined;
+
+  const [addDocOpen, setAddDocOpen] = useState(false);
+  const [pickedKind, setPickedKind] = useState<DocumentKind | null>(null);
 
   if (!project) {
     return (
@@ -55,6 +94,9 @@ const DashboardProjectDetail = () => {
     );
   }
 
+  const documents = project.documents ?? [];
+  const usedKinds = new Set(documents.map((d) => d.kind));
+
   const progress =
     project.status === "ready"
       ? 100
@@ -65,6 +107,22 @@ const DashboardProjectDetail = () => {
       : project.status === "error"
       ? 70
       : 40;
+
+  const openWizardForDoc = (kind: DocumentKind, asNewVersion = false) => {
+    const params = new URLSearchParams({
+      projectId: project.id,
+      docKind: kind,
+    });
+    if (asNewVersion) params.set("mode", "new_version");
+    navigate(`/dashboard/upload?${params.toString()}`);
+  };
+
+  const confirmAddDocument = () => {
+    if (!pickedKind) return;
+    setAddDocOpen(false);
+    toast.success(`Добавляем документ: ${DOCUMENT_KIND_LABEL[pickedKind]}`);
+    setTimeout(() => openWizardForDoc(pickedKind), 200);
+  };
 
   return (
     <DashboardLayout>
@@ -81,34 +139,21 @@ const DashboardProjectDetail = () => {
               <ProjectStatusBadge status={project.status} />
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span>{project.documentTypeLabel}</span>
-              <span>· {project.objectType}</span>
+              <span>Объект: {project.objectType}</span>
+              {project.workType && <span>· {project.workType}</span>}
+              <span>· Документов: {documents.length}</span>
               <span>· Создан {project.createdAt}</span>
-              <span>· Схема {project.xsdVersion}</span>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {project.status !== "ready" && (
-              <Button onClick={() => navigate(`/dashboard/upload?projectId=${project.id}`)}>
-                <Play className="h-4 w-4 mr-1.5" /> Запустить генерацию
+            <Button onClick={() => setAddDocOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" /> Добавить документ
+            </Button>
+            {project.status === "ready" && (
+              <Button variant="outline" onClick={() => toast.success("Скачивание началось")}>
+                <Download className="h-4 w-4 mr-1.5" /> Скачать всё ZIP
               </Button>
             )}
-            {project.status === "ready" && (
-              <>
-                <Button variant="outline" onClick={() => toast.success("Скачивание началось")}>
-                  <Download className="h-4 w-4 mr-1.5" /> Скачать ZIP
-                </Button>
-                <Button variant="outline" onClick={() => toast("Открываем предпросмотр")}>
-                  <Eye className="h-4 w-4 mr-1.5" /> Предпросмотр
-                </Button>
-              </>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/dashboard/upload?projectId=${project.id}`)}
-            >
-              <Plus className="h-4 w-4 mr-1.5" /> Новая версия
-            </Button>
           </div>
         </div>
 
@@ -133,7 +178,7 @@ const DashboardProjectDetail = () => {
               <div className="text-sm">
                 <p className="font-medium">XML не прошёл XSD-проверку</p>
                 <p className="text-muted-foreground">
-                  Найдено ошибок: {project.errorsCount}. Откройте вкладку «Ошибки», чтобы их исправить.
+                  Найдено ошибок: {project.errorsCount}. Откройте вкладку «Версии XML», чтобы их исправить.
                 </p>
               </div>
             </CardContent>
@@ -146,7 +191,7 @@ const DashboardProjectDetail = () => {
               <div className="text-sm">
                 <p className="font-medium">XML прошёл XSD-проверку. Архив сформирован.</p>
                 <p className="text-muted-foreground">
-                  Документ сформирован и готов к передаче в Минстрой РФ.
+                  Документы готовы к передаче в Минстрой РФ.
                 </p>
               </div>
             </CardContent>
@@ -167,6 +212,91 @@ const DashboardProjectDetail = () => {
                 </Badge>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Documents in project */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base">Документы проекта</CardTitle>
+            <Button size="sm" variant="outline" onClick={() => setAddDocOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" /> Добавить
+            </Button>
+          </CardHeader>
+          <CardContent className="p-0">
+            {documents.length === 0 ? (
+              <div className="p-10 text-center text-muted-foreground text-sm">
+                В проекте пока нет документов. Добавьте первый, например — Пояснительную записку.
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Документ</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead>Версий</TableHead>
+                    <TableHead>Ошибок</TableHead>
+                    <TableHead className="hidden md:table-cell">Схема</TableHead>
+                    <TableHead className="hidden md:table-cell">Обновлён</TableHead>
+                    <TableHead className="text-right">Действия</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {documents.map((d) => (
+                    <TableRow key={d.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          {d.kindLabel}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <ProjectStatusBadge status={d.status} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{d.versions}</TableCell>
+                      <TableCell className={cn("text-muted-foreground", d.errorsCount > 0 && "text-destructive")}>
+                        {d.errorsCount}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground font-mono text-xs">
+                        {d.xsdVersion}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground whitespace-nowrap">
+                        {d.updatedAt}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          {d.status === "ready" ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toast.success("Скачивание началось")}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openWizardForDoc(d.kind)}
+                            >
+                              <Play className="h-4 w-4 mr-1" /> Продолжить
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openWizardForDoc(d.kind, true)}
+                            title="Создать новую версию"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -323,6 +453,65 @@ const DashboardProjectDetail = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Add document dialog */}
+      <Dialog open={addDocOpen} onOpenChange={setAddDocOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Добавить документ в проект</DialogTitle>
+            <DialogDescription>
+              Тип объекта и реквизиты подставятся из проекта — вам останется только загрузить файлы.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 py-2">
+            {DOC_KIND_OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const used = usedKinds.has(opt.id);
+              const active = pickedKind === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={used}
+                  onClick={() => setPickedKind(opt.id)}
+                  className={cn(
+                    "flex items-start gap-3 rounded-lg border p-4 text-left transition-colors",
+                    active && "border-primary ring-2 ring-primary/30",
+                    used && "opacity-50 cursor-not-allowed",
+                    !used && !active && "hover:bg-secondary/40",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                      active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium flex items-center gap-2">
+                      {opt.label}
+                      {used && <Badge variant="secondary">уже добавлен</Badge>}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{opt.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDocOpen(false)}>
+              Отмена
+            </Button>
+            <Button onClick={confirmAddDocument} disabled={!pickedKind}>
+              Продолжить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

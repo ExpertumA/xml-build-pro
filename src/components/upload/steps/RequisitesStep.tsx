@@ -27,7 +27,7 @@ interface RequisitesStepProps {
   data?: Partial<RequisitesData>;
   onChange?: (data: RequisitesData) => void;
   onNext: () => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const RequisitesStep = ({ data, onChange, onNext, onBack }: RequisitesStepProps) => {
@@ -158,7 +158,9 @@ const RequisitesStep = ({ data, onChange, onNext, onBack }: RequisitesStepProps)
       </Card>
 
       <div className="flex justify-between">
-        <Button variant="outline" size="lg" onClick={onBack}>Назад</Button>
+        {onBack ? (
+          <Button variant="outline" size="lg" onClick={onBack}>Назад</Button>
+        ) : <span />}
         <Button size="lg" onClick={onNext} disabled={!isValid}>Продолжить</Button>
       </div>
     </div>
