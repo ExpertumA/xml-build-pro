@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import StatusBadge from "@/components/dashboard/StatusBadge";
+import ProjectStatusBadge from "@/components/projects/ProjectStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,111 +11,102 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Upload, 
-  FileCheck, 
-  AlertCircle, 
-  Gauge,
+import {
   Plus,
-  Download,
-  Eye
+  Eye,
+  FolderKanban,
+  AlertTriangle,
+  CheckCircle2,
+  Wallet,
+  Users,
+  Bell,
+  FileSearch,
 } from "lucide-react";
+import { PROJECTS } from "@/lib/projectsData";
 
 const stats = [
   {
-    title: "Загружено документов",
-    value: "24",
-    icon: Upload,
+    title: "Активные проекты",
+    value: PROJECTS.filter((p) => !["ready", "expired"].includes(p.status)).length,
+    icon: FolderKanban,
     color: "text-primary",
   },
   {
-    title: "Успешно сформировано",
-    value: "21",
-    icon: FileCheck,
-    color: "text-success",
+    title: "На проверке",
+    value: PROJECTS.filter((p) => p.status === "needs_user_action" || p.status === "in_review").length,
+    icon: FileSearch,
+    color: "text-amber-600",
   },
   {
     title: "С ошибками",
-    value: "3",
-    icon: AlertCircle,
+    value: PROJECTS.filter((p) => p.status === "error").length,
+    icon: AlertTriangle,
     color: "text-destructive",
   },
   {
-    title: "Остаток по тарифу",
-    value: "26 / 50",
-    icon: Gauge,
-    color: "text-primary",
+    title: "Готовые XML",
+    value: PROJECTS.filter((p) => p.status === "ready").length,
+    icon: CheckCircle2,
+    color: "text-success",
   },
 ];
 
-const recentDocuments = [
+const notifications = [
   {
-    id: "1",
-    name: "ПЗ_Жилой_комплекс_Новый.pdf",
-    type: "Пояснительная записка",
-    status: "success" as const,
-    schema: "minstroyPZ_v2.1",
-    date: "12.01.2025",
+    id: "n1",
+    text: "Есть проекты, требующие проверки",
+    detail: "Логистический центр, склад А — поля с низкой уверенностью",
+    tone: "warning" as const,
   },
   {
-    id: "2",
-    name: "Задание_проектирование_склад.docx",
-    type: "Задание на проектирование",
-    status: "success" as const,
-    schema: "minstroyZP_v1.3",
-    date: "11.01.2025",
+    id: "n2",
+    text: "Есть готовые XML для скачивания",
+    detail: "ЖК «Северный квартал», корпус 3",
+    tone: "success" as const,
   },
   {
-    id: "3",
-    name: "Конъюнктурный_анализ_Q4.xlsx",
-    type: "Конъюнктурный анализ",
-    status: "error" as const,
-    schema: "minstroyKA_v1.0",
-    date: "10.01.2025",
-  },
-  {
-    id: "4",
-    name: "Ведомость_объемов_офис.pdf",
-    type: "Ведомость объёмов работ",
-    status: "processing" as const,
-    schema: "minstroyVOR_v2.0",
-    date: "10.01.2025",
-  },
-  {
-    id: "5",
-    name: "ПЗ_Торговый_центр.pdf",
-    type: "Пояснительная записка",
-    status: "success" as const,
-    schema: "minstroyPZ_v2.1",
-    date: "09.01.2025",
+    id: "n3",
+    text: "Найдены ошибки в проекте",
+    detail: "Реконструкция школы №15 — XML не прошёл XSD",
+    tone: "danger" as const,
   },
 ];
 
 const Dashboard = () => {
+  const recent = PROJECTS.slice(0, 5);
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">Обзор</h1>
+            <h1 className="text-2xl font-semibold">Здравствуйте, Иван</h1>
             <p className="text-muted-foreground">
-              Статистика и последние документы
+              Тариф «Проект» · Баланс: 12 500 ₽
             </p>
           </div>
-          <Button asChild>
-            <Link to="/dashboard/upload">
-              <Plus className="h-4 w-4 mr-2" />
-              Загрузить документ
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/dashboard/billing-documents">
+                <Wallet className="h-4 w-4 mr-2" />
+                Пополнить
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/dashboard/projects/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Создать проект
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, index) => (
             <Card key={index}>
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">{stat.title}</p>
@@ -130,64 +121,109 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Recent documents */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Последние документы</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/dashboard/documents">Все документы</Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Название</TableHead>
-                  <TableHead className="hidden md:table-cell">Тип</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead className="hidden lg:table-cell">XML-схема</TableHead>
-                  <TableHead className="hidden sm:table-cell">Дата</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentDocuments.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-medium max-w-[200px] truncate">
-                      {doc.name}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-muted-foreground">
-                      {doc.type}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={doc.status} />
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell text-muted-foreground font-mono text-sm">
-                      {doc.schema}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell text-muted-foreground">
-                      {doc.date}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Recent projects */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base">Последние проекты</CardTitle>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard/projects">Все проекты</Link>
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Название</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead className="hidden md:table-cell">Обновлён</TableHead>
+                    <TableHead className="text-right">Открыть</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recent.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell className="font-medium max-w-[260px] truncate">
+                        <Link
+                          to={`/dashboard/projects/${p.id}`}
+                          className="hover:underline"
+                        >
+                          {p.name}
+                        </Link>
+                        <div className="text-xs text-muted-foreground">
+                          {p.documentTypeLabel}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <ProjectStatusBadge status={p.status} />
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground">
+                        {p.updatedAt}
+                      </TableCell>
+                      <TableCell className="text-right">
                         <Button variant="ghost" size="icon" asChild>
-                          <Link to={`/dashboard/documents/${doc.id}`}>
+                          <Link to={`/dashboard/projects/${p.id}`}>
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
-                        {doc.status === "success" && (
-                          <Button variant="ghost" size="icon">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Notifications + Quick actions */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2">
+                <Bell className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-base">Уведомления</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`rounded-lg border p-3 text-sm ${
+                      n.tone === "warning"
+                        ? "border-amber-200 bg-amber-50/60 dark:bg-amber-500/5"
+                        : n.tone === "danger"
+                        ? "border-destructive/30 bg-destructive/5"
+                        : "border-success/30 bg-success/5"
+                    }`}
+                  >
+                    <p className="font-medium">{n.text}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">{n.detail}</p>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Быстрые действия</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 gap-2">
+                <Button variant="outline" className="justify-start" asChild>
+                  <Link to="/dashboard/projects/new">
+                    <Plus className="h-4 w-4 mr-2" /> Создать проект
+                  </Link>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <Link to="/dashboard/billing-documents">
+                    <Wallet className="h-4 w-4 mr-2" /> Перейти в оплату
+                  </Link>
+                </Button>
+                <Button variant="outline" className="justify-start" asChild>
+                  <Link to="/dashboard/company">
+                    <Users className="h-4 w-4 mr-2" /> Сотрудники
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
