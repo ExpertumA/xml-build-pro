@@ -33,6 +33,18 @@ const Header = () => {
             >
               Тарифы
             </Link>
+            <Link 
+              to="/faq" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              FAQ
+            </Link>
+            <Link 
+              to="/support" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Поддержка
+            </Link>
           </nav>
         )}
 

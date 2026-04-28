@@ -31,21 +31,26 @@ const Footer = () => {
                   Тарифы
                 </Link>
               </li>
+              <li>
+                <Link to="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-medium mb-4">Компания</h4>
+            <h4 className="font-medium mb-4">Поддержка</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  О нас
-                </a>
+                <Link to="/support" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Связаться с нами
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Контакты
-                </a>
+                <Link to="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Частые вопросы
+                </Link>
               </li>
             </ul>
           </div>
