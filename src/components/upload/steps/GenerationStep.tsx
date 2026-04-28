@@ -58,7 +58,7 @@ const GenerationStep = ({
     if (!isGenerating) return;
 
     let stepIndex = 0;
-    let progressInterval: NodeJS.Timeout;
+    let progressInterval: ReturnType<typeof setInterval>;
 
     const runStep = () => {
       if (stepIndex >= steps.length) {
