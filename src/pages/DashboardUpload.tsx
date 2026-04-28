@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import WizardStepper from "@/components/upload/WizardStepper";
 import DocumentTypeStep from "@/components/upload/steps/DocumentTypeStep";
@@ -20,12 +21,27 @@ const steps = [
 ];
 
 const DashboardUpload = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [documentType, setDocumentType] = useState<string | null>(null);
-  const [objectType, setObjectType] = useState<string | null>(null);
-  const [workType, setWorkType] = useState<string | null>("construction");
+  const [searchParams] = useSearchParams();
+  const prefillDocType = searchParams.get("docType");
+  const prefillObjectType = searchParams.get("objectType");
+  const prefillWorkType = searchParams.get("workType");
+  const hasPrefill = Boolean(prefillDocType && prefillObjectType && prefillWorkType);
+
+  const [currentStep, setCurrentStep] = useState(hasPrefill ? 3 : 1);
+  const [documentType, setDocumentType] = useState<string | null>(prefillDocType);
+  const [objectType, setObjectType] = useState<string | null>(prefillObjectType);
+  const [workType, setWorkType] = useState<string | null>(prefillWorkType ?? "construction");
   const [classification, setClassification] = useState<string | null>(null);
   const [requisites, setRequisites] = useState<RequisitesData | undefined>();
+
+  useEffect(() => {
+    if (hasPrefill) {
+      setDocumentType(prefillDocType);
+      setObjectType(prefillObjectType);
+      setWorkType(prefillWorkType);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const goToStep = (step: number) => {
     if (step < currentStep) setCurrentStep(step);
