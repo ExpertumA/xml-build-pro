@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import WizardStepper from "@/components/upload/WizardStepper";
@@ -9,8 +9,11 @@ import DocumentUploadStep from "@/components/upload/steps/DocumentUploadStep";
 import GenerationStep from "@/components/upload/steps/GenerationStep";
 import PreviewStep from "@/components/upload/steps/PreviewStep";
 import ResultStep from "@/components/upload/steps/ResultStep";
+import { getProject, DOCUMENT_KIND_LABEL, type DocumentKind } from "@/lib/projectsData";
+import { Card, CardContent } from "@/components/ui/card";
+import { FolderOpen } from "lucide-react";
 
-const steps = [
+const ALL_STEPS = [
   { id: 1, label: "Тип документа" },
   { id: 2, label: "Тип объекта" },
   { id: 3, label: "Реквизиты" },
@@ -22,12 +25,20 @@ const steps = [
 
 const DashboardUpload = () => {
   const [searchParams] = useSearchParams();
-  const prefillDocType = searchParams.get("docType");
-  const prefillObjectType = searchParams.get("objectType");
-  const prefillWorkType = searchParams.get("workType");
-  const hasPrefill = Boolean(prefillDocType && prefillObjectType && prefillWorkType);
+  const projectId = searchParams.get("projectId");
+  const project = projectId ? getProject(projectId) : undefined;
 
-  const [currentStep, setCurrentStep] = useState(hasPrefill ? 3 : 1);
+  // Pre-selected document kind for adding a new document into an existing project
+  const newDocKind = searchParams.get("docKind") as DocumentKind | null;
+
+  const prefillDocType = searchParams.get("docType") || newDocKind || project?.documentType || null;
+  const prefillObjectType = searchParams.get("objectType") || null;
+  const prefillWorkType = searchParams.get("workType") || null;
+
+  // Project context already covers steps 1-2: docType from project, объект/работы заданы при создании
+  const skipToRequisites = Boolean(project) || Boolean(prefillDocType && prefillObjectType);
+
+  const [currentStep, setCurrentStep] = useState(skipToRequisites ? 3 : 1);
   const [documentType, setDocumentType] = useState<string | null>(prefillDocType);
   const [objectType, setObjectType] = useState<string | null>(prefillObjectType);
   const [workType, setWorkType] = useState<string | null>(prefillWorkType ?? "construction");
@@ -35,23 +46,32 @@ const DashboardUpload = () => {
   const [requisites, setRequisites] = useState<RequisitesData | undefined>();
 
   useEffect(() => {
-    if (hasPrefill) {
+    if (skipToRequisites) {
       setDocumentType(prefillDocType);
       setObjectType(prefillObjectType);
-      setWorkType(prefillWorkType);
+      setWorkType(prefillWorkType ?? "construction");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Hide steps 1-2 from the stepper when context is provided
+  const visibleSteps = useMemo(
+    () => (skipToRequisites ? ALL_STEPS.filter((s) => s.id >= 3) : ALL_STEPS),
+    [skipToRequisites],
+  );
+
+  const minStep = skipToRequisites ? 3 : 1;
+  const maxStep = ALL_STEPS.length;
+
   const goToStep = (step: number) => {
-    if (step < currentStep) setCurrentStep(step);
+    if (step < currentStep && step >= minStep) setCurrentStep(step);
   };
-  const nextStep = () => setCurrentStep((p) => Math.min(p + 1, steps.length));
-  const prevStep = () => setCurrentStep((p) => Math.max(p - 1, 1));
+  const nextStep = () => setCurrentStep((p) => Math.min(p + 1, maxStep));
+  const prevStep = () => setCurrentStep((p) => Math.max(p - 1, minStep));
 
   const handleGenerationComplete = useCallback(() => {
-    setCurrentStep((p) => Math.min(p + 1, steps.length));
-  }, []);
+    setCurrentStep((p) => Math.min(p + 1, maxStep));
+  }, [maxStep]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -82,7 +102,7 @@ const DashboardUpload = () => {
             data={requisites}
             onChange={setRequisites}
             onNext={nextStep}
-            onBack={prevStep}
+            onBack={currentStep > minStep ? prevStep : undefined as unknown as () => void}
           />
         );
       case 4:
@@ -116,11 +136,46 @@ const DashboardUpload = () => {
     }
   };
 
+  const docKindLabel =
+    documentType && documentType in DOCUMENT_KIND_LABEL
+      ? DOCUMENT_KIND_LABEL[documentType as DocumentKind]
+      : null;
+
   return (
     <DashboardLayout>
       <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6">
-        <WizardStepper steps={steps} currentStep={currentStep} onStepClick={goToStep} />
+        <WizardStepper steps={visibleSteps} currentStep={currentStep} onStepClick={goToStep} />
       </div>
+
+      {/* Project context banner (when wizard is opened from a project) */}
+      {project && (
+        <div className="container max-w-5xl mx-auto pt-6">
+          <Card className="bg-secondary/40 border-dashed">
+            <CardContent className="p-4 flex items-center gap-3 text-sm">
+              <FolderOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                <span className="text-muted-foreground">Проект:</span>
+                <span className="font-medium">{project.name}</span>
+                <span className="text-muted-foreground">·</span>
+                <span>{project.objectType}</span>
+                {project.workType && (
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span>{project.workType}</span>
+                  </>
+                )}
+                {docKindLabel && (
+                  <>
+                    <span className="text-muted-foreground">·</span>
+                    <span>Документ: <span className="font-medium">{docKindLabel}</span></span>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="py-8">{renderStep()}</div>
     </DashboardLayout>
   );
