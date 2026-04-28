@@ -93,9 +93,9 @@ export const PROJECTS: Project[] = [
       { id: "h3", date: "14.04.2026 11:30", actor: "Иван Иванов", text: "Запущена генерация" },
     ],
     xmlVersions: [
-      { id: "v3", version: "v3", date: "14.04.2026", author: "Иван Иванов", xsdPassed: true, checksum: "8af3…b21c" },
-      { id: "v2", version: "v2", date: "13.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "1cd9…0e44" },
-      { id: "v1", version: "v1", date: "12.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "77ab…a901" },
+      { id: "v3", version: "v3", date: "14.04.2026", author: "Иван Иванов", xsdPassed: true, checksum: "8af3…b21c", note: "Финальная сборка после правок раздела «Технические решения»", errorsCount: 0, sizeKb: 184 },
+      { id: "v2", version: "v2", date: "13.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "1cd9…0e44", note: "Не прошёл XSD: пустые даты приложений", errorsCount: 4, sizeKb: 178 },
+      { id: "v1", version: "v1", date: "12.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "77ab…a901", note: "Первая автосборка", errorsCount: 7, sizeKb: 172 },
     ],
   },
   {
@@ -119,7 +119,7 @@ export const PROJECTS: Project[] = [
       { id: "h2", date: "10.04.2026 16:00", actor: "Анна Петрова", text: "Проект создан" },
     ],
     xmlVersions: [
-      { id: "v1", version: "v1", date: "13.04.2026", author: "Анна Петрова", xsdPassed: false, checksum: "e431…aa10" },
+      { id: "v1", version: "v1", date: "13.04.2026", author: "Анна Петрова", xsdPassed: false, checksum: "e431…aa10", note: "Поля с низкой уверенностью OCR", errorsCount: 0, sizeKb: 96 },
     ],
   },
   {
@@ -142,7 +142,7 @@ export const PROJECTS: Project[] = [
       { id: "h1", date: "08.04.2026 14:22", actor: "Система", text: "XML не прошёл XSD-проверку" },
     ],
     xmlVersions: [
-      { id: "v1", version: "v1", date: "08.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "0099…ffaa" },
+      { id: "v1", version: "v1", date: "08.04.2026", author: "Иван Иванов", xsdPassed: false, checksum: "0099…ffaa", note: "XSD: 3 ошибки в разделе «Объект»", errorsCount: 3, sizeKb: 142 },
     ],
   },
   {
