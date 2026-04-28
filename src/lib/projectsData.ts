@@ -62,6 +62,9 @@ export interface Project {
     author: string;
     xsdPassed: boolean;
     checksum: string;
+    note?: string;
+    errorsCount?: number;
+    sizeKb?: number;
   }[];
 }
 
