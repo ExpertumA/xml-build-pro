@@ -21,7 +21,6 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "Проекты", href: "/dashboard/projects", icon: FolderKanban },
-  { name: "Документы", href: "/dashboard/documents", icon: FileText },
   { name: "Биллинг и документы", href: "/dashboard/billing-documents", icon: Wallet },
   { name: "Компания", href: "/dashboard/company", icon: Building2 },
   { name: "Настройки", href: "/dashboard/settings", icon: Settings },
