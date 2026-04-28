@@ -39,9 +39,16 @@ const DashboardProjectNew = () => {
   const handleCreate = () => {
     if (!docType) return toast.error("Выберите тип документа");
     if (!objectType) return toast.error("Выберите тип объекта");
+    if (!workType) return toast.error("Выберите вид работ");
     if (!name.trim()) return toast.error("Укажите название проекта");
-    toast.success("Проект создан как черновик");
-    setTimeout(() => navigate("/dashboard/projects"), 600);
+    toast.success("Проект создан. Переходим к загрузке документов");
+    const params = new URLSearchParams({
+      name: name.trim(),
+      docType,
+      objectType,
+      workType,
+    });
+    setTimeout(() => navigate(`/dashboard/upload?${params.toString()}`), 400);
   };
 
   return (

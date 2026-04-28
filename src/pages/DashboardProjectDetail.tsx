@@ -89,7 +89,7 @@ const DashboardProjectDetail = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             {project.status !== "ready" && (
-              <Button onClick={() => toast.success("Генерация запущена")}>
+              <Button onClick={() => navigate(`/dashboard/upload?projectId=${project.id}`)}>
                 <Play className="h-4 w-4 mr-1.5" /> Запустить генерацию
               </Button>
             )}
@@ -103,7 +103,10 @@ const DashboardProjectDetail = () => {
                 </Button>
               </>
             )}
-            <Button variant="outline" onClick={() => toast("Создана новая версия")}>
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/dashboard/upload?projectId=${project.id}`)}
+            >
               <Plus className="h-4 w-4 mr-1.5" /> Новая версия
             </Button>
           </div>
