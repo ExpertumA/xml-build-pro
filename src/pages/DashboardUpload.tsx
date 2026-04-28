@@ -102,7 +102,7 @@ const DashboardUpload = () => {
             data={requisites}
             onChange={setRequisites}
             onNext={nextStep}
-            onBack={currentStep > minStep ? prevStep : undefined as unknown as () => void}
+            onBack={currentStep > minStep ? prevStep : undefined}
           />
         );
       case 4:
